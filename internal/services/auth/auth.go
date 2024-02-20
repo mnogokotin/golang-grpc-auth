@@ -26,10 +26,10 @@ var (
 
 //go:generate go run github.com/vektra/mockery/v2@v2.28.2 --name=URLSaver
 type UserSaver interface {
-	SaveUser(
+	CreateUser(
 		ctx context.Context,
 		email string,
-		passHash []byte,
+		passwordHash []byte,
 	) (uid int64, err error)
 }
 
@@ -81,18 +81,15 @@ func (a *Auth) Login(
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
 			a.log.Warn("user not found", err)
-
 			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 
 		a.log.Error("failed to get user", err)
-
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(password)); err != nil {
 		a.log.Info("invalid credentials", err)
-
 		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 
@@ -113,36 +110,32 @@ func (a *Auth) Login(
 	return token, nil
 }
 
-// RegisterNewUser registers new user in the system and returns user ID.
+// Register registers new user in the system and returns user ID.
 // If user with given username already exists, returns error.
-func (a *Auth) RegisterNewUser(ctx context.Context, email string, pass string) (int64, error) {
-	const op = "Auth.RegisterNewUser"
+func (a *Auth) Register(ctx context.Context, email string, pass string) (int64, error) {
+	const op = "Auth.Register"
 
 	log := a.log.With(
 		slog.String("op", op),
 		slog.String("email", email),
 	)
-
 	log.Info("registering user")
 
-	passHash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err != nil {
 		log.Error("failed to generate password hash", err)
-
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	id, err := a.usrSaver.SaveUser(ctx, email, passHash)
+	id, err := a.usrSaver.CreateUser(ctx, email, passwordHash)
 	if err != nil {
-		log.Error("failed to save user", err)
-
+		log.Error("failed to create user", err)
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return id, nil
 }
 
-// IsAdmin checks if user is admin.
 func (a *Auth) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 	const op = "Auth.IsAdmin"
 

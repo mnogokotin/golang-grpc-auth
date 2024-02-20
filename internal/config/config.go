@@ -5,18 +5,23 @@ import (
 	"time"
 )
 
-type Config struct {
-	Env            string `yaml:"env"`
-	StoragePath    string `yaml:"storage_path" env-required:"true"`
-	Grpc           Grpc   `yaml:"grpc"`
-	MigrationsPath string
-	TokenTtl       time.Duration `yaml:"token_ttl"`
-}
+type (
+	Config struct {
+		Env      string        `yaml:"env"`
+		Grpc     Grpc          `yaml:"grpc"`
+		Pg       Pg            `yaml:"pg"`
+		TokenTtl time.Duration `yaml:"token_ttl"`
+	}
 
-type Grpc struct {
-	Port    int           `yaml:"port"`
-	Timeout time.Duration `yaml:"timeout"`
-}
+	Grpc struct {
+		Port    int           `yaml:"port"`
+		Timeout time.Duration `yaml:"timeout"`
+	}
+
+	Pg struct {
+		Url string `yaml:"url" env:"PG_URL"`
+	}
+)
 
 func New() *Config {
 	configPath := "./config/main.yml" // os.Getenv("CONFIG_PATH")

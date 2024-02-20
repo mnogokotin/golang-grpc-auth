@@ -70,7 +70,6 @@ func (a *App) MustRun() {
 	}
 }
 
-// Run runs grpc server.
 func (a *App) Run() error {
 	const op = "grpcapp.Run"
 
@@ -88,7 +87,6 @@ func (a *App) Run() error {
 	return nil
 }
 
-// Stop stops grpc server.
 func (a *App) Stop() {
 	const op = "grpcapp.Stop"
 

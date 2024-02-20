@@ -1,6 +1,7 @@
 env: "local" # dev, prod
-storage_path: "./storage/sso.db"
-token_ttl: 1h
 grpc:
   port: 50051
   timeout: 60s
+pg:
+  url: postgres://golang_grpc_auth_user:golang_grpc_auth_user_password@host.docker.internal:54352/golang_grpc_auth?sslmode=disable
+token_ttl: 1h

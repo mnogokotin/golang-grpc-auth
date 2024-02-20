@@ -13,7 +13,7 @@ func main() {
 	cfg := config.New()
 	log := logger.New(cfg.Env)
 
-	app := iapp.New(log, cfg.Grpc.Port, cfg.StoragePath, cfg.TokenTtl)
+	app := iapp.New(log, cfg.Grpc.Port, cfg.Pg.Url, cfg.TokenTtl)
 
 	go func() {
 		app.GrpcServer.MustRun()

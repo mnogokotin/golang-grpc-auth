@@ -7,7 +7,6 @@ import (
 	"github.com/mnogokotin/golang-grpc-auth/internal/domain/model"
 )
 
-// NewToken creates new JWT token for given user and app.
 func NewToken(user model.User, app model.App, duration time.Duration) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 

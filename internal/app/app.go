@@ -3,7 +3,7 @@ package app
 import (
 	grpcapp "github.com/mnogokotin/golang-grpc-auth/internal/app/grpc"
 	"github.com/mnogokotin/golang-grpc-auth/internal/services/auth"
-	"github.com/mnogokotin/golang-grpc-auth/internal/storage/sqlite"
+	"github.com/mnogokotin/golang-grpc-auth/internal/storage/postgres"
 	"log/slog"
 	"time"
 )
@@ -15,10 +15,10 @@ type App struct {
 func New(
 	log *slog.Logger,
 	grpcPort int,
-	storagePath string,
+	pgUrl string,
 	tokenTTL time.Duration,
 ) *App {
-	storage, err := sqlite.New(storagePath)
+	storage, err := postgres.New(pgUrl)
 	if err != nil {
 		panic(err)
 	}

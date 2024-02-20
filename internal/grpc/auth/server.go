@@ -20,7 +20,7 @@ type Auth interface {
 		password string,
 		appID int,
 	) (token string, err error)
-	RegisterNewUser(
+	Register(
 		ctx context.Context,
 		email string,
 		password string,
@@ -77,7 +77,7 @@ func (s *serverAPI) Register(
 		return nil, status.Error(codes.InvalidArgument, "password is required")
 	}
 
-	uid, err := s.auth.RegisterNewUser(ctx, in.GetEmail(), in.GetPassword())
+	uid, err := s.auth.Register(ctx, in.GetEmail(), in.GetPassword())
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
