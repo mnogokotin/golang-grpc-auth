@@ -3,7 +3,7 @@ package main
 import (
 	iapp "github.com/mnogokotin/golang-grpc-auth/internal/app"
 	"github.com/mnogokotin/golang-grpc-auth/internal/config"
-	"github.com/mnogokotin/golang-grpc-auth/pkg/logger"
+	"github.com/mnogokotin/golang-packages/logger"
 	"os"
 	"os/signal"
 	"syscall"
