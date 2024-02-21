@@ -8,35 +8,19 @@ import (
 	"github.com/lib/pq"
 	"github.com/mnogokotin/golang-grpc-auth/internal/domain/model"
 	"github.com/mnogokotin/golang-grpc-auth/internal/storage"
+	"github.com/mnogokotin/golang-packages/database/postgres"
 	"strings"
 )
 
 type Postgres struct {
-	db *sql.DB
+	*postgres.Postgres
 }
 
-func New(connectionUri string) (*Postgres, error) {
-	db, err := sql.Open("postgres", connectionUri)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Postgres{
-		db: db,
-	}, nil
-}
-
-func (p *Postgres) Close() {
-	if err := p.db.Close(); err != nil {
-		fmt.Printf("could not close postgres connection: %s", err)
-	}
-}
-
-func (p *Postgres) CreateUser(ctx context.Context, email string, passwordHash []byte) (int64, error) {
-	const op = "storage.postgres.CreateUser"
+func (p *Postgres) SaveUser(ctx context.Context, email string, passwordHash []byte) (int64, error) {
+	const op = "storage.postgres.SaveUser"
 
 	var user model.User
-	err := p.db.QueryRow(`INSERT INTO users(email, password_hash)
+	err := p.Db.QueryRow(`INSERT INTO users(email, password_hash)
 	VALUES($1, $2) RETURNING id`, email, passwordHash).Scan(&user.ID)
 
 	if err != nil {
@@ -55,7 +39,7 @@ func (p *Postgres) User(ctx context.Context, email string) (model.User, error) {
 	const op = "storage.postgres.User"
 
 	var user model.User
-	err := p.db.QueryRow(`SELECT id, email, password_hash FROM users 
+	err := p.Db.QueryRow(`SELECT id, email, password_hash FROM users 
 	WHERE email = $1`, email).Scan(&user.ID, &user.Email, &user.PasswordHash)
 
 	if err != nil {
@@ -72,7 +56,7 @@ func (p *Postgres) App(ctx context.Context, id int) (model.App, error) {
 	const op = "storage.postgres.App"
 
 	var app model.App
-	err := p.db.QueryRow(`SELECT id, name, secret FROM apps 
+	err := p.Db.QueryRow(`SELECT id, name, secret FROM apps 
 	WHERE id = $1`, id).Scan(&app.ID, &app.Name, &app.Secret)
 
 	if err != nil {
@@ -89,7 +73,7 @@ func (p *Postgres) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 	const op = "storage.postgres.IsAdmin"
 
 	var user model.User
-	err := p.db.QueryRow(`SELECT is_admin FROM users
+	err := p.Db.QueryRow(`SELECT is_admin FROM users
 	WHERE id = $1`, userID).Scan(&user.IsAdmin)
 
 	if err != nil {

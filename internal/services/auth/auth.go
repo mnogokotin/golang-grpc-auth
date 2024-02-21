@@ -14,7 +14,7 @@ import (
 
 type Auth struct {
 	log         *slog.Logger
-	usrSaver    UserSaver
+	userSaver   UserSaver
 	usrProvider UserProvider
 	appProvider AppProvider
 	tokenTTL    time.Duration
@@ -26,7 +26,7 @@ var (
 
 //go:generate go run github.com/vektra/mockery/v2@v2.28.2 --name=URLSaver
 type UserSaver interface {
-	CreateUser(
+	SaveUser(
 		ctx context.Context,
 		email string,
 		passwordHash []byte,
@@ -50,9 +50,9 @@ func New(
 	tokenTTL time.Duration,
 ) *Auth {
 	return &Auth{
-		usrSaver:    userSaver,
-		usrProvider: userProvider,
 		log:         log,
+		userSaver:   userSaver,
+		usrProvider: userProvider,
 		appProvider: appProvider,
 		tokenTTL:    tokenTTL,
 	}
@@ -127,7 +127,7 @@ func (a *Auth) Register(ctx context.Context, email string, pass string) (int64, 
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	id, err := a.usrSaver.CreateUser(ctx, email, passwordHash)
+	id, err := a.userSaver.SaveUser(ctx, email, passwordHash)
 	if err != nil {
 		log.Error("failed to create user", err)
 		return 0, fmt.Errorf("%s: %w", op, err)

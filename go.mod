@@ -8,6 +8,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/lib/pq v1.10.9
+	github.com/mnogokotin/golang-packages v1.2.1
 	github.com/mnogokotin/grpc-protos v0.0.1
 	golang.org/x/crypto v0.19.0
 	google.golang.org/grpc v1.61.1
