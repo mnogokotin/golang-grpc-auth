@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lib/pq"
 	"github.com/mnogokotin/golang-grpc-auth/internal/domain/model"
 	"github.com/mnogokotin/golang-grpc-auth/internal/storage"
 	"github.com/mnogokotin/golang-packages/database/postgres"
@@ -24,8 +23,7 @@ func (p *Postgres) SaveUser(ctx context.Context, email string, passwordHash []by
 	VALUES($1, $2) RETURNING id`, email, passwordHash).Scan(&user.ID)
 
 	if err != nil {
-		var postgresErr pq.PGError
-		if errors.As(err, &postgresErr) && strings.Contains(err.Error(), "users_email_key") {
+		if strings.Contains(err.Error(), "users_email_key") {
 			return 0, fmt.Errorf("%s: %w", op, storage.ErrUserExists)
 		}
 
