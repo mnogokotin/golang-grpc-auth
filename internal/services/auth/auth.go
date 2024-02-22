@@ -30,6 +30,7 @@ type UserSaver interface {
 		ctx context.Context,
 		email string,
 		passwordHash []byte,
+		appID int64,
 	) (uid int64, err error)
 }
 
@@ -39,7 +40,7 @@ type UserProvider interface {
 }
 
 type AppProvider interface {
-	App(ctx context.Context, appID int) (model.App, error)
+	App(ctx context.Context, appID int64) (model.App, error)
 }
 
 func New(
@@ -66,7 +67,7 @@ func (a *Auth) Login(
 	ctx context.Context,
 	email string,
 	password string,
-	appID int,
+	appID int64,
 ) (string, error) {
 	const op = "Auth.Login"
 
@@ -112,22 +113,23 @@ func (a *Auth) Login(
 
 // Register registers new user in the system and returns user ID.
 // If user with given username already exists, returns error.
-func (a *Auth) Register(ctx context.Context, email string, pass string) (int64, error) {
+func (a *Auth) Register(ctx context.Context, email string, password string, appID int64) (int64, error) {
 	const op = "Auth.Register"
 
 	log := a.log.With(
 		slog.String("op", op),
 		slog.String("email", email),
+		slog.Int64("appID", appID),
 	)
 	log.Info("registering user")
 
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Error("failed to generate password hash", err)
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	id, err := a.userSaver.SaveUser(ctx, email, passwordHash)
+	id, err := a.userSaver.SaveUser(ctx, email, passwordHash, appID)
 	if err != nil {
 		log.Error("failed to create user", err)
 		return 0, fmt.Errorf("%s: %w", op, err)

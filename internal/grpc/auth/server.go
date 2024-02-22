@@ -18,12 +18,13 @@ type Auth interface {
 		ctx context.Context,
 		email string,
 		password string,
-		appID int,
+		appID int64,
 	) (token string, err error)
 	Register(
 		ctx context.Context,
 		email string,
 		password string,
+		appID int64,
 	) (userID int64, err error)
 	IsAdmin(ctx context.Context, userID int64) (bool, error)
 }
@@ -53,7 +54,7 @@ func (s *serverAPI) Login(
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), int(req.GetAppId()))
+	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), req.GetAppId())
 	if err != nil {
 		if errors.Is(err, auth.ErrInvalidCredentials) {
 			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
@@ -72,13 +73,14 @@ func (s *serverAPI) Register(
 	registerRequest := &requests.RegisterRequest{
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
+		AppID:    req.GetAppId(),
 	}
 	validate = validator.New()
 	if err := validate.Struct(registerRequest); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	uid, err := s.auth.Register(ctx, req.GetEmail(), req.GetPassword())
+	uid, err := s.auth.Register(ctx, req.GetEmail(), req.GetPassword(), req.GetAppId())
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
