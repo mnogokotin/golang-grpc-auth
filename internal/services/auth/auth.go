@@ -13,11 +13,11 @@ import (
 )
 
 type Auth struct {
-	log         *slog.Logger
-	userSaver   UserSaver
-	usrProvider UserProvider
-	appProvider AppProvider
-	tokenTTL    time.Duration
+	log          *slog.Logger
+	userSaver    UserSaver
+	userProvider UserProvider
+	appProvider  AppProvider
+	tokenTTL     time.Duration
 }
 
 var (
@@ -50,11 +50,11 @@ func New(
 	tokenTTL time.Duration,
 ) *Auth {
 	return &Auth{
-		log:         log,
-		userSaver:   userSaver,
-		usrProvider: userProvider,
-		appProvider: appProvider,
-		tokenTTL:    tokenTTL,
+		log:          log,
+		userSaver:    userSaver,
+		userProvider: userProvider,
+		appProvider:  appProvider,
+		tokenTTL:     tokenTTL,
 	}
 }
 
@@ -77,7 +77,7 @@ func (a *Auth) Login(
 
 	log.Info("attempting to login user")
 
-	user, err := a.usrProvider.User(ctx, email)
+	user, err := a.userProvider.User(ctx, email)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
 			a.log.Warn("user not found", err)
@@ -88,14 +88,14 @@ func (a *Auth) Login(
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(password)); err != nil {
-		a.log.Info("invalid credentials", err)
+	app, err := a.appProvider.App(ctx, appID)
+	if user.AppID != appID {
 		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 
-	app, err := a.appProvider.App(ctx, appID)
-	if err != nil {
-		return "", fmt.Errorf("%s: %w", op, err)
+	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(password)); err != nil {
+		a.log.Info("invalid credentials", err)
+		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 
 	log.Info("user logged in successfully")
@@ -146,7 +146,7 @@ func (a *Auth) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 
 	log.Info("checking if user is admin")
 
-	isAdmin, err := a.usrProvider.IsAdmin(ctx, userID)
+	isAdmin, err := a.userProvider.IsAdmin(ctx, userID)
 	if err != nil {
 		return false, fmt.Errorf("%s: %w", op, err)
 	}

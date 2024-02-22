@@ -3,16 +3,14 @@ package grpcapp
 import (
 	"context"
 	"fmt"
-	"log/slog"
-	"net"
-
-	authgrpc "github.com/mnogokotin/golang-grpc-auth/internal/grpc/auth"
-
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	authgrpc "github.com/mnogokotin/golang-grpc-auth/internal/grpc/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log/slog"
+	"net"
 )
 
 type App struct {
