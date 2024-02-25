@@ -7,6 +7,7 @@ import (
 	"github.com/mnogokotin/golang-grpc-auth/internal/grpc/auth/requests"
 	"github.com/mnogokotin/golang-grpc-auth/internal/services/auth"
 	"github.com/mnogokotin/golang-grpc-auth/internal/storage"
+	pvalidator "github.com/mnogokotin/golang-packages/validator"
 	ssov1 "github.com/mnogokotin/grpc-protos/gen/go/sso"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -51,7 +52,8 @@ func (s *serverAPI) Login(
 	}
 	validate = validator.New()
 	if err := validate.Struct(loginRequest); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		errs := pvalidator.BuildValidationErrors(err)
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 
 	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), req.GetAppId())
@@ -77,7 +79,8 @@ func (s *serverAPI) Register(
 	}
 	validate = validator.New()
 	if err := validate.Struct(registerRequest); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		errs := pvalidator.BuildValidationErrors(err)
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 
 	uid, err := s.auth.Register(ctx, req.GetEmail(), req.GetPassword(), req.GetAppId())
@@ -101,7 +104,8 @@ func (s *serverAPI) IsAdmin(
 	}
 	validate = validator.New()
 	if err := validate.Struct(registerRequest); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		errs := pvalidator.BuildValidationErrors(err)
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 
 	isAdmin, err := s.auth.IsAdmin(ctx, req.GetUserId())

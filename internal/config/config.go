@@ -28,7 +28,7 @@ func New() *Config {
 	var cfg Config
 
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		panic("cannot read config: " + err.Error())
+		panic("can't read config: " + err.Error())
 	}
 
 	return &cfg
