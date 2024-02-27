@@ -52,23 +52,6 @@ func (p *Postgres) User(ctx context.Context, email string) (model.User, error) {
 	return user, nil
 }
 
-func (p *Postgres) App(ctx context.Context, appID int64) (model.App, error) {
-	const op = "storage.postgres.App"
-
-	var app model.App
-	err := p.Db.QueryRow(`SELECT id, name, secret FROM apps 
-	WHERE id = $1`, appID).Scan(&app.ID, &app.Name, &app.Secret)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return model.App{}, fmt.Errorf("%s: %w", op, storage.ErrAppNotFound)
-		}
-		return model.App{}, fmt.Errorf("%s: %w", op, err)
-	}
-
-	return app, nil
-}
-
 func (p *Postgres) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 	const op = "storage.postgres.IsAdmin"
 

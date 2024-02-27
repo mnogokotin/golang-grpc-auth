@@ -3,7 +3,8 @@ package app
 import (
 	grpcapp "github.com/mnogokotin/golang-grpc-auth/internal/app/grpc"
 	"github.com/mnogokotin/golang-grpc-auth/internal/services/auth"
-	"github.com/mnogokotin/golang-grpc-auth/internal/storage/postgres"
+	apostgres "github.com/mnogokotin/golang-grpc-auth/internal/storage/apps/postgres"
+	upostgres "github.com/mnogokotin/golang-grpc-auth/internal/storage/users/postgres"
 	ppostgres "github.com/mnogokotin/golang-packages/database/postgres"
 	"log/slog"
 	"time"
@@ -23,11 +24,14 @@ func New(
 	if err != nil {
 		panic(err)
 	}
-	storage := &postgres.Postgres{
+	userStorage := &upostgres.Postgres{
+		Postgres: ppg,
+	}
+	appStorage := &apostgres.Postgres{
 		Postgres: ppg,
 	}
 
-	authService := auth.New(log, storage, storage, storage, tokenTTL)
+	authService := auth.New(log, userStorage, userStorage, appStorage, tokenTTL)
 
 	grpcApp := grpcapp.New(log, authService, grpcPort)
 
